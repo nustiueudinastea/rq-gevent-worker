@@ -17,7 +17,6 @@ except ImportError: # for rq <= 0.4.6
 from rq.timeouts import BaseDeathPenalty, JobTimeoutException
 from rq.worker import StopRequested, green, blue, WorkerStatus
 from rq.exceptions import DequeueTimeout
-from rq.logutils import setup_loghandlers
 from rq.version import VERSION
 
 
@@ -88,7 +87,6 @@ class GeventWorker(Worker):
 
         The return value indicates whether any jobs were processed.
         """
-        setup_loghandlers()
         self._install_signal_handlers()
 
         self.did_perform_work = False
@@ -167,7 +165,7 @@ class GeventWorker(Worker):
         if self.get_state() != WorkerStatus.BUSY:
             self.set_state(WorkerStatus.BUSY)
 
-        child_greenlet = self.gevent_pool.spawn(self.perform_job, job)
+        child_greenlet = self.gevent_pool.spawn(self.perform_job, job, queue)
         child_greenlet.link(job_done)
         self.gevent_greenlets.append(child_greenlet)
 
